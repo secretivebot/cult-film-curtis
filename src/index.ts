@@ -345,35 +345,38 @@ const paidRoutes = createElysiaPaidRoutes(app, {
   },
 });
 
-paidRoutes.post(
-  "/cultmovieidea",
-  () => {
-    const film = getRandomCultFilm();
-    const recommendation = formatRecommendation(film);
-    return {
-      ...recommendation,
-      payment: {
-        status: "verified",
-        amount: PRICE_USDC,
-        currency: "USDC",
-      },
-    };
-  },
-  {
+// Handler for cult movie recommendation
+const cultMovieHandler = () => {
+  const film = getRandomCultFilm();
+  const recommendation = formatRecommendation(film);
+  return {
+    ...recommendation,
     payment: {
-      accepts: {
-        scheme: "exact",
-        network: BASE_NETWORK,
-        payTo: walletAddress,
-        price: {
-          asset: USDC_ADDRESS,
-          amount: PRICE_MICRO_USDC,
-        },
-      },
-      description: "Get a cult film recommendation from Curtis",
+      status: "verified",
+      amount: PRICE_USDC,
+      currency: "USDC",
     },
-  }
-);
+  };
+};
+
+const paymentConfig = {
+  payment: {
+    accepts: {
+      scheme: "exact",
+      network: BASE_NETWORK,
+      payTo: walletAddress,
+      price: {
+        asset: USDC_ADDRESS,
+        amount: PRICE_MICRO_USDC,
+      },
+    },
+    description: "Get a cult film recommendation from Curtis",
+  },
+};
+
+// Support both GET and POST for browser and API compatibility
+paidRoutes.get("/cultmovieidea", cultMovieHandler, paymentConfig);
+paidRoutes.post("/cultmovieidea", cultMovieHandler, paymentConfig);
 
 // Start server
 app.listen(PORT);
